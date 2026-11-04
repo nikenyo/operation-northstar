@@ -1,0 +1,866 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>OPERATION NORTHSTAR</title>
+
+<style>
+:root {
+  --bg: #07110c;
+  --panel: #0e1d14;
+  --border: #2b4d39;
+  --green: #91efad;
+  --lime: #d1ff85;
+  --muted: #9ab3a1;
+  --amber: #ffd17d;
+  --white: #edf6ef;
+}
+
+* { box-sizing: border-box; }
+
+body {
+  margin: 0;
+  min-height: 100vh;
+  background: radial-gradient(ellipse at 50% -15%, #1b402b, #09150e 48%, #050a07);
+  color: var(--white);
+  font-family: Consolas, "Courier New", monospace;
+}
+
+body::before {
+  content: "";
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  opacity: .1;
+  background-image:
+    linear-gradient(#91efad20 1px, transparent 1px),
+    linear-gradient(90deg, #91efad20 1px, transparent 1px);
+  background-size: 34px 34px;
+}
+
+.wrap {
+  max-width: 900px;
+  margin: auto;
+  padding: 22px 17px 50px;
+  position: relative;
+}
+
+header, footer, .meta, .status, .actions {
+  display: flex;
+  justify-content: space-between;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
+header {
+  align-items: center;
+  border-bottom: 1px solid var(--border);
+  padding: 7px 0 17px;
+}
+
+.brand {
+  font-size: 11px;
+  letter-spacing: .14em;
+  color: var(--green);
+}
+
+.stamp, .tag {
+  font-size: 10px;
+  letter-spacing: .1em;
+  padding: 6px 8px;
+  border: 1px solid var(--border);
+  color: var(--muted);
+}
+
+.stamp {
+  color: var(--amber);
+  border-color: #765c30;
+}
+
+.meta {
+  justify-content: flex-start;
+  margin: 14px 0;
+}
+
+.status {
+  font-size: 10px;
+  color: var(--muted);
+  border-bottom: 1px dashed var(--border);
+  padding-bottom: 13px;
+}
+
+h1 {
+  font-size: clamp(36px, 8vw, 66px);
+  line-height: .98;
+  letter-spacing: -.05em;
+  color: var(--green);
+  margin: 15px 0;
+}
+
+h2 {
+  font-size: clamp(21px, 4vw, 29px);
+  color: var(--green);
+  margin: 0 0 13px;
+}
+
+p {
+  font-size: 13px;
+  line-height: 1.7;
+  color: #c8d9cd;
+}
+
+.lead { font-size: 15px; }
+.muted { color: var(--muted); }
+.tiny { font-size: 10px; }
+.amber { color: var(--amber); }
+.gold { color: #f0d28e; }
+
+.panel {
+  background: linear-gradient(145deg, #0f2117f7, #07120cf7);
+  border: 1px solid var(--border);
+  padding: clamp(17px, 4vw, 28px);
+  margin: 15px 0;
+  box-shadow: 0 14px 40px #0005;
+}
+
+.alert {
+  border-left: 3px solid var(--amber);
+  background: #2b2416;
+  color: #f6dfa9;
+  padding: 11px 14px;
+  font-size: 11px;
+  line-height: 1.7;
+  margin: 17px 0;
+}
+
+.progress {
+  height: 5px;
+  background: #1b3023;
+  margin: 18px 0 8px;
+}
+
+.progress span {
+  display: block;
+  height: 100%;
+  width: 0;
+  background: var(--green);
+  transition: .35s;
+}
+
+.progress-label {
+  display: flex;
+  justify-content: space-between;
+  color: var(--muted);
+  font-size: 10px;
+  margin-bottom: 18px;
+}
+
+button {
+  font: inherit;
+  font-size: 11px;
+  font-weight: 800;
+  letter-spacing: .06em;
+  padding: 12px 16px;
+  border: 1px solid var(--green);
+  background: var(--green);
+  color: #07110c;
+  cursor: pointer;
+}
+
+button:hover { background: var(--lime); }
+
+button:disabled {
+  opacity: .35;
+  cursor: not-allowed;
+}
+
+.actions {
+  justify-content: flex-start;
+  margin-top: 20px;
+}
+
+input[type="text"] {
+  width: min(100%, 430px);
+  padding: 12px;
+  background: #050d08;
+  border: 1px solid var(--border);
+  color: var(--white);
+  font: inherit;
+  font-size: 13px;
+}
+
+.choice {
+  display: block;
+  border: 1px solid var(--border);
+  background: #09160f;
+  padding: 12px;
+  margin: 8px 0;
+  font-size: 12px;
+  line-height: 1.55;
+  cursor: pointer;
+}
+
+.choice:hover { border-color: var(--green); }
+
+.choice input {
+  accent-color: var(--green);
+  margin-right: 9px;
+}
+
+.feedback {
+  display: none;
+  margin-top: 15px;
+  padding: 12px;
+  border: 1px solid var(--border);
+  font-size: 11px;
+  line-height: 1.65;
+}
+
+.feedback.show { display: block; }
+
+.feedback.good {
+  border-color: #3c8055;
+  background: #10271a;
+  color: var(--green);
+}
+
+.feedback.bad {
+  border-color: #8b4d40;
+  background: #291510;
+  color: #ffc0a9;
+}
+
+.terminal {
+  white-space: pre-wrap;
+  background: #030906;
+  border: 1px solid var(--border);
+  padding: 15px;
+  color: var(--green);
+  font-size: 12px;
+  line-height: 1.8;
+  overflow-wrap: anywhere;
+}
+
+.hidden { display: none !important; }
+
+.reveal {
+  text-align: center;
+  padding: 30px 8px;
+}
+
+.tribute {
+  font-family: Georgia, serif;
+  font-size: clamp(19px, 4vw, 26px);
+  line-height: 1.55;
+  color: #f2e7ce;
+  max-width: 690px;
+  margin: 26px auto;
+}
+
+.signature {
+  font-size: 10px;
+  letter-spacing: .15em;
+  color: var(--green);
+  line-height: 1.8;
+  margin-top: 28px;
+}
+
+footer {
+  border-top: 1px solid var(--border);
+  padding-top: 13px;
+  margin-top: 30px;
+  color: #718d7a;
+  font-size: 9px;
+}
+
+.hint { margin-top: 12px; }
+
+.evidence {
+  width: 100%;
+  height: auto;
+  display: block;
+  border: 1px solid var(--border);
+  margin: 18px auto 10px;
+  max-width: 760px;
+}
+
+.open-box {
+  font-size: clamp(15px, 3vw, 20px);
+  color: var(--lime);
+  letter-spacing: .05em;
+  margin: 22px 0 8px;
+}
+</style>
+</head>
+
+<body>
+<div class="wrap">
+
+<header>
+  <div class="brand">◈ HUMANITARIAN INFORMATION MANAGEMENT CELL</div>
+  <div class="stamp">RESTRICTED // INTERNAL USE</div>
+</header>
+
+<div class="meta">
+  <span class="tag">MISSION: NORTHSTAR</span>
+  <span class="tag">STATUS: ACTIVE</span>
+  <span class="tag">DEPLOYMENT: INDIVIDUAL</span>
+</div>
+
+<div class="status">
+  <span>SUBJECT DESIGNATION: <b style="color:var(--lime)">NORTHSTAR</b></span>
+  <span>THREAT LEVEL: <b style="color:var(--amber)">UNDETERMINED</b></span>
+  <span>LEAD: INDEPENDENT IM OFFICER</span>
+</div>
+
+<div class="progress"><span id="bar"></span></div>
+<div class="progress-label">
+  <span id="phase">MISSION BRIEFING</span>
+  <span id="count">0 / 6</span>
+</div>
+
+<!-- OPENING -->
+<section class="panel" id="s0">
+  <div class="tiny amber">OPERATIONAL ALERT // PRIORITY REVIEW</div>
+  <h1>OPERATION<br>NORTHSTAR</h1>
+
+  <p class="lead">
+    An unusual pattern has been detected across the Information
+    Management network. Several operational records indicate an
+    unexplained concentration of knowledge, experience, and
+    institutional influence associated with one individual.
+  </p>
+
+  <div class="alert">
+    <b>INCIDENT TYPE:</b> Unusual Knowledge Concentration<br>
+    <b>SUBJECT DESIGNATION:</b> NORTHSTAR<br>
+    <b>OPERATIONAL PRIORITY:</b> High<br>
+    <b>LEAD INVESTIGATOR:</b> One (1) independent IM officer
+  </div>
+
+  <p>
+    Preliminary indicators suggest that the subject may possess an
+    exceptional understanding of the command structure, an unusual
+    ability to challenge assumptions, and a history of making complex
+    operational problems easier to navigate.
+  </p>
+
+  <p class="muted tiny">
+    Your task is to verify the subject's identity, evaluate selected
+    intelligence, and submit a final operational assessment.
+    All responses will be reviewed collectively.
+  </p>
+
+  <div class="actions">
+    <button onclick="go(1)">ACCEPT DEPLOYMENT →</button>
+  </div>
+</section>
+
+<!-- QUESTION 1: BINARY -->
+<section class="panel hidden" id="s1">
+  <div class="tiny amber">ASSESSMENT 00 // IDENTITY VERIFICATION</div>
+  <h2>Decode the personnel identifier</h2>
+
+  <p>
+    An intercepted personnel identifier has been recovered.
+    Decode the sequence to confirm the identity of the deployed subject.
+  </p>
+
+  <div class="terminal">01000001 01001100 01000101 01011000</div>
+
+  <input id="identity" type="text" placeholder="Enter decoded identifier">
+
+  <div class="actions">
+    <button onclick="submit(1)">SUBMIT RESPONSE</button>
+  </div>
+  <div class="feedback" id="f1"></div>
+</section>
+
+<!-- QUESTION 2: PARMIN -->
+<section class="panel hidden" id="s2">
+  <div class="tiny amber">ASSESSMENT 01 // PERSONNEL INTELLIGENCE</div>
+  <h2>Verify command familiarity</h2>
+
+  <p>Before proceeding, verify one piece of critical personnel intelligence.</p>
+  <p class="lead">On what date was Boss Parmin born?</p>
+
+  <div class="actions">
+    <button class="hint" onclick="showHint('h2a')">REQUEST HINT 01</button>
+    <button class="hint" onclick="showHint('h2b')">REQUEST HINT 02</button>
+  </div>
+
+  <div class="feedback" id="h2a">
+    HINT 01: <b>28335</b>
+  </div>
+
+  <div class="feedback" id="h2b">
+    HINT 02: Make sure you open the code in Excel.
+  </div>
+
+  <br>
+  <label class="tiny" for="dob">ENTER DATE OF BIRTH</label><br><br>
+  <input id="dob" type="text" placeholder="Enter date">
+
+  <div class="actions">
+    <button onclick="submit(2)">SUBMIT RESPONSE</button>
+  </div>
+  <div class="feedback" id="f2"></div>
+</section>
+
+<!-- QUESTION 3: BIRDS -->
+<section class="panel hidden" id="s3">
+  <div class="tiny amber">ASSESSMENT 02 // SITUATIONAL AWARENESS</div>
+  <h2>Assess the field situation</h2>
+
+  <p>Five birds are sitting in a tree. A hunter shoots one of them.</p>
+  <p class="lead">How many birds remain in the tree?</p>
+
+  <div class="actions">
+    <button class="hint" onclick="showHint('h3')">REQUEST A HINT</button>
+  </div>
+
+  <div class="feedback" id="h3">
+    If the birds get startled, do you think any of the others will stick around?
+  </div>
+
+  <label class="choice"><input type="radio" name="birds" value="0"> 0</label>
+  <label class="choice"><input type="radio" name="birds" value="1"> 1</label>
+  <label class="choice"><input type="radio" name="birds" value="4"> 4</label>
+  <label class="choice"><input type="radio" name="birds" value="5"> 5</label>
+
+  <div class="actions">
+    <button onclick="submit(3)">SUBMIT RESPONSE</button>
+  </div>
+  <div class="feedback" id="f3"></div>
+</section>
+
+<!-- QUESTION 4: CALCULATION -->
+<section class="panel hidden" id="s4">
+  <div class="tiny amber">ASSESSMENT 03 // NUMERICAL REASONING</div>
+  <h2>Validate the calculation</h2>
+
+  <p>
+    Calculate the following sequence. Take your time;
+    rapid responses are not necessarily accurate responses.
+  </p>
+
+  <div class="terminal">
+1000 + 40 + 1000 + 30 + 1000 + 20 + 1000 + 10 = ?
+  </div>
+
+  <div class="actions">
+    <button class="hint" onclick="showHint('h4')">REQUEST A HINT</button>
+  </div>
+
+  <div class="feedback" id="h4">
+    Calculate. Slowly. No need to impress anyone with your speed.
+  </div>
+
+  <p class="tiny muted">Enter a whole number.</p>
+  <input id="sum" type="text" inputmode="numeric" placeholder="Enter your result">
+
+  <div class="actions">
+    <button onclick="submit(4)">SUBMIT RESPONSE</button>
+  </div>
+  <div class="feedback" id="f4"></div>
+</section>
+
+<!-- QUESTION 5: CLAUDE -->
+<section class="panel hidden" id="s5">
+  <div class="tiny amber">ASSESSMENT 04 // SYSTEM DEPENDENCY ANALYSIS</div>
+  <h2>Identify the critical dependency</h2>
+
+  <p class="lead">
+    What is the one thing NORTHSTAR cannot live without for even a single day?
+  </p>
+
+  <p class="tiny muted">
+    A seemingly ordinary tool has been identified as a potentially
+    critical operational dependency.
+  </p>
+
+  <div class="actions">
+    <button class="hint" onclick="showHint('h5a')">REQUEST HINT 01</button>
+    <button class="hint" onclick="showHint('h5b')">REQUEST HINT 02</button>
+  </div>
+
+  <div class="feedback" id="h5a">
+    HINT 01: You said it to one of your IM officers on 3 October.
+  </div>
+
+  <div class="feedback" id="h5b">
+    HINT 02: Still stuck? Think… <b>TUYUL.</b>
+    Yes, that should narrow it down. Probably.
+  </div>
+
+  <input id="dependency" type="text" placeholder="Enter the suspected dependency">
+
+  <div class="actions">
+    <button onclick="submit(5)">SUBMIT RESPONSE</button>
+  </div>
+  <div class="feedback" id="f5"></div>
+</section>
+
+<!-- QUESTION 6: RING -->
+<section class="panel hidden" id="s6">
+  <div class="tiny amber">ASSESSMENT 05 // OBJECT IDENTIFICATION</div>
+  <h2>A rather familiar riddle</h2>
+
+  <p class="lead">“What have I got in my pocket?”</p>
+
+  <p class="tiny muted">
+    The question has a well-documented literary precedent.
+    Consider the object that made the riddle rather troublesome.
+  </p>
+
+  <div class="actions">
+    <button class="hint" onclick="showHint('h6a')">REQUEST HINT 01</button>
+    <button class="hint" onclick="showHint('h6b')">REQUEST HINT 02</button>
+  </div>
+
+  <div class="feedback" id="h6a">
+    HINT 01: <b>Precious.</b>
+  </div>
+
+  <div class="feedback" id="h6b">
+    HINT 02: You may want to revisit the riddle between Bilbo and
+    Gollum in <i>The Hobbit</i>.
+  </div>
+
+  <input id="pocket" type="text" placeholder="Name the object">
+
+  <div class="actions">
+    <button onclick="submit(6)">SUBMIT RESPONSE</button>
+  </div>
+  <div class="feedback" id="f6"></div>
+</section>
+
+<!-- FINAL REVIEW -->
+<section class="panel hidden" id="s7">
+  <div class="tiny amber">FINAL REVIEW // CONSOLIDATED INTELLIGENCE</div>
+  <h2>Assessment received</h2>
+
+  <p>
+    All six responses have been verified. The system is consolidating
+    the evidence and calculating the NORTHSTAR suitability index.
+  </p>
+
+  <div class="terminal" id="report">
+IDENTITY VERIFICATION .......... REVIEWED
+PERSONNEL INTELLIGENCE ........ REVIEWED
+SITUATIONAL AWARENESS ......... REVIEWED
+NUMERICAL REASONING ........... REVIEWED
+SYSTEM DEPENDENCY ............. REVIEWED
+OBJECT IDENTIFICATION ......... REVIEWED
+
+CALCULATING SUITABILITY INDEX ...
+  </div>
+
+  <div class="actions">
+    <button id="release" onclick="reveal()">RELEASE FINAL ASSESSMENT</button>
+  </div>
+
+  <div class="feedback good" id="result"></div>
+</section>
+
+<!-- DECLASSIFICATION -->
+<section class="panel hidden reveal" id="s8">
+  <div class="tiny amber">CLASSIFICATION STATUS // DECLASSIFIED</div>
+
+  <h1>MISSION<br>ACCOMPLISHED.</h1>
+
+  <p class="gold">THE INVESTIGATION IS COMPLETE.</p>
+
+  <p class="tribute">
+    The anomaly was never a technical issue. It was the impact of one
+    person who has helped others learn, grow, and find their way through
+    the work.
+  </p>
+
+  <p>
+    Behind every capable IM officer, there is often someone who took
+    the time to explain, encourage, challenge, and trust them to figure
+    things out.
+  </p>
+
+  <h2 class="gold" style="margin-top:35px">Happy Birthday, Mas Alex.</h2>
+
+  
+  <div class="actions" style="justify-content:center">
+    <button onclick="go(9)">OPEN PERSONAL MESSAGE →</button>
+  </div>
+</section>
+
+<!-- PERSONAL MESSAGE: SEPARATE PAGE -->
+<section class="panel hidden" id="s9">
+  <div class="tiny amber">PERSONAL MESSAGE</div>
+  <h3>A note from one grateful IM officer</h3>
+
+  <p>Mas Alex,</p>
+
+  <p>
+    Happy birthday to one of the best mentors we could ever ask for!
+	</p>
+
+<p>
+Thank you for always sharing your knowledge, guiding us through the challenges, and most importantly, believing in us even when we're still figuring things out. You have this incredible way of making us feel that we can learn, grow, and become better IM knights.
+</p>
+
+<p>
+Your encouragement, patience, and willingness to share what you know mean more than you probably realize. We’re lucky to learn from someone who is not only great at what he does but also genuinely great at bringing others along.
+  </p>
+
+  <p>
+    May the year ahead bring you happiness, good health, meaningful adventures,
+    fewer urgent requests, cleaner datasets, valid coordinates,
+    and dashboards that refresh on the first try.
+  </p>
+
+  <p>
+    You have more than earned a day when nobody asks you to fix
+    their spreadsheet.
+  </p>
+
+  <p>Happy birthday, and thank you for everything.</p>
+
+  <div class="actions">
+    <button onclick="go(10)">CONTINUE TO FINAL EVIDENCE →</button>
+  </div>
+</section>
+
+<!-- FINAL SCREENSHOT PAGE -->
+<section class="panel hidden reveal" id="s10">
+  <div class="tiny amber">FINAL EVIDENCE // RELEASE AUTHORIZED</div>
+
+  <h2>THE LAST PIECE OF THE OPERATION</h2>
+
+  <p>
+    The answer you gave earlier has now been matched to the final
+    piece of evidence.
+  </p>
+
+  <img
+    class="evidence"
+    src="northstar-final.jpg"
+    alt="WhatsApp exchange about the most memorable assignment location"
+  >
+
+  <p class="open-box"><b>You may open the box now!</b></p>
+
+  <p class="muted">
+    The final answer is waiting for you in the real world.
+  </p>
+
+  <div class="actions" style="justify-content:center">
+    <button onclick="location.reload()">REPLAY OPERATION</button>
+  </div>
+</section>
+
+<footer>
+  <span>NORTHSTAR // INTERNAL IM CELL USE ONLY</span>
+  <span>NO OPERATIONAL DEPLOYMENT REQUIRED</span>
+</footer>
+
+</div>
+
+<script>
+let current = 0;
+let score = 0;
+
+const phases = [
+  'MISSION BRIEFING',
+  'IDENTITY VERIFICATION',
+  'PERSONNEL INTELLIGENCE',
+  'SITUATIONAL AWARENESS',
+  'NUMERICAL REASONING',
+  'SYSTEM DEPENDENCY',
+  'OBJECT IDENTIFICATION',
+  'FINAL REVIEW',
+  'DECLASSIFIED',
+  'PERSONAL MESSAGE',
+  'FINAL EVIDENCE'
+];
+
+function go(n) {
+  document.getElementById('s' + current).classList.add('hidden');
+
+  current = n;
+
+  document.getElementById('s' + n).classList.remove('hidden');
+
+  let completed = Math.max(0, Math.min(n - 1, 6));
+
+  document.getElementById('bar').style.width =
+    (completed / 6 * 100) + '%';
+
+  document.getElementById('phase').textContent = phases[n];
+  document.getElementById('count').textContent = completed + ' / 6';
+
+  window.scrollTo({ top: 0, behavior: 'smooth' });
+}
+
+function showHint(id) {
+  document.getElementById(id).classList.add('show');
+}
+
+function normalize(s) {
+  return s.toLowerCase()
+    .trim()
+    .replace(/[.,!?]/g, '')
+    .replace(/\s+/g, ' ');
+}
+
+function submit(n) {
+  let v = null;
+
+  if (n === 1) {
+    v = normalize(document.getElementById('identity').value);
+  }
+
+  if (n === 2) {
+    v = normalize(document.getElementById('dob').value).replace(/,/g, '');
+  }
+
+  if (n === 3) {
+    const selected = document.querySelector('input[name="birds"]:checked');
+    v = selected ? selected.value : null;
+  }
+
+  if (n === 4) {
+    v = document.getElementById('sum').value.trim().replace(/[ ,]/g, '');
+  }
+
+  if (n === 5) {
+    v = normalize(document.getElementById('dependency').value);
+  }
+
+  if (n === 6) {
+    v = normalize(document.getElementById('pocket').value);
+  }
+
+  const feedback = document.getElementById('f' + n);
+
+  if (!v) {
+    feedback.className = 'feedback show bad';
+    feedback.textContent =
+      'NO RESPONSE DETECTED. Please provide an answer before submitting.';
+    return;
+  }
+
+  let correct = false;
+
+  if (n === 1) correct = v === 'alex';
+
+  if (n === 2) {
+    correct = [
+      '29 july 1977',
+      '29/07/1977',
+      '29-07-1977',
+      'july 29 1977',
+      '29.07.1977',
+      '28335'
+    ].includes(v);
+  }
+
+  if (n === 3) correct = v === '0';
+
+  if (n === 4) correct = v === '4100';
+
+  if (n === 5) {
+    correct = ['claude', 'claude ai'].includes(v);
+  }
+
+  if (n === 6) {
+    correct = ['ring', 'a ring', 'the ring', 'one ring'].includes(v);
+  }
+
+  if (!correct) {
+    feedback.className = 'feedback show bad';
+    feedback.textContent =
+      'RESPONSE NOT ACCEPTED. Review the available intelligence and try again. NORTHSTAR cannot proceed on an unverified response.';
+    return;
+  }
+
+  score++;
+
+  feedback.className = 'feedback show good';
+
+  const messages = {
+    1:
+      'IDENTITY CONFIRMED. Subject designation NORTHSTAR has been successfully established.',
+
+    2:
+      'You need to know your bestie moreeee. Personnel intelligence verified. Carry on.',
+
+    3:
+      'Rilexxxxxxxx, bos. It was just a simple riddle. No need to convene an IMWG meeting over five birds.',
+
+    4:
+      'Huffft. Thank God you calculated it slowly as I said. We nearly had to open an incident ticket for basic arithmetic.',
+
+    5:
+      'DEPENDENCY CONFIRMED: CLAUDE. We respect your commitment to cross-platform collaboration. GPT is fine. GPT is totally fine. (Typing this through tears.)',
+
+    6:
+      'OBJECT IDENTIFIED. Preciousss. NORTHSTAR has successfully survived the most suspicious pocket-related interrogation in Middle-earth. Soooooo precioussss.'
+  };
+
+  feedback.textContent =
+    messages[n] + ' Response accepted. Proceeding to the next assessment.';
+
+  const buttons = document.querySelectorAll('#s' + n + ' .actions button');
+
+  buttons.forEach(button => {
+    if (button.textContent.includes('SUBMIT')) {
+      button.disabled = true;
+      button.textContent = 'RESPONSE VERIFIED';
+    }
+  });
+
+  setTimeout(() => {
+    go(n === 6 ? 7 : n + 1);
+  }, 6000);
+}
+
+function reveal() {
+  const names = [
+    'Identity verification',
+    'Personnel intelligence',
+    'Situational awareness',
+    'Numerical reasoning',
+    'System dependency',
+    'Object identification'
+  ];
+
+  const lines = names.map(name =>
+    name.toUpperCase().padEnd(29, '.') + ' PASS'
+  ).join('\n');
+
+  document.getElementById('report').textContent =
+    'NORTHSTAR SUITABILITY INDEX: ' + score + '/6\n\n' +
+    lines +
+    '\n\nALL RESPONSES VERIFIED.\n' +
+    'SUBJECT STATUS: CLEARED FOR DECLASSIFICATION.';
+
+  const result = document.getElementById('result');
+
+  result.innerHTML =
+    '<b>FINAL RESULT: ' + score + '/6</b><br>' +
+    'Exceptional. The subject demonstrates outstanding operational ' +
+    'readiness, questionable software loyalties, and a suspiciously ' +
+    'good grasp of riddles.<br><br>' +
+    'Proceed to declassification to discover the true purpose of this operation.';
+
+  result.classList.add('show');
+
+  const button = document.getElementById('release');
+
+  button.textContent = 'PROCEED TO DECLASSIFICATION';
+  button.onclick = () => go(8);
+}
+</script>
+
+</body>
+</html>
